@@ -1,0 +1,620 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AR 動圖工坊｜新增作品</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 25px;
+  font-family: Arial, "Microsoft JhengHei", sans-serif;
+  background: #f5f1ff;
+  color: #333;
+}
+
+.container {
+  max-width: 900px;
+  margin: auto;
+}
+
+h1 {
+  color: #7655c9;
+  text-align: center;
+}
+
+.panel {
+  background: white;
+  border-radius: 16px;
+  padding: 22px;
+  margin: 18px 0;
+  box-shadow: 0 4px 18px #00000010;
+}
+
+label {
+  display: block;
+  margin: 16px 0 8px;
+  font-weight: bold;
+}
+
+input[type="text"],
+input[type="file"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+input[type="range"] {
+  width: 100%;
+  accent-color: #7655c9;
+}
+
+.preview {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: #eee;
+  border: 2px dashed #b9a6e8;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#targetPreview {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  position: absolute;
+}
+
+#gifPreview {
+  position: absolute;
+  width: 30%;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  transform-origin: center;
+  display: none;
+  pointer-events: none;
+}
+
+button {
+  background: #7655c9;
+  color: white;
+  border: none;
+  border-radius: 9px;
+  padding: 13px 22px;
+  font-size: 16px;
+  cursor: pointer;
+  margin: 8px 5px 0 0;
+}
+
+button:hover {
+  background: #6241b3;
+}
+
+.value {
+  color: #7655c9;
+  font-weight: bold;
+}
+
+.note {
+  color: #777;
+  font-size: 13px;
+  line-height: 1.7;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<h1>✨ 我的 AR 動圖工坊</h1>
+<p style="text-align:center">
+  新增作品・上傳圖片・調整 GIF
+</p>
+
+<div class="panel">
+
+  <label>作品名稱</label>
+  <input type="text" id="projectName"
+    placeholder="例如：Bamby">
+
+  <label>① 上傳 AR 辨識圖片</label>
+  <input type="file" id="targetFile"
+    accept="image/*">
+
+  <label>② 上傳自己的 GIF 動圖</label>
+  <input type="file" id="gifFile"
+    accept="image/gif">
+
+  <p class="note">
+    辨識圖片是未來手機要掃描的圖片；
+    GIF 則是辨識成功後要顯示的動畫。
+  </p>
+
+</div>
+
+<div class="panel">
+
+  <h3>③ 動圖預覽與調整</h3>
+
+  <div class="preview" id="preview">
+    <span id="hint">請先上傳辨識圖片及 GIF</span>
+    <img id="targetPreview">
+    <img id="gifPreview">
+  </div>
+
+  <label>
+    動圖大小：
+    <span class="value" id="sizeValue">30%</span>
+  </label>
+  <input type="range" id="size"
+    min="5" max="90" value="30">
+
+  <label>
+    左右位置：
+    <span class="value" id="xValue">50%</span>
+  </label>
+  <input type="range" id="posX"
+    min="0" max="100" value="50">
+
+  <label>
+    上下位置：
+    <span class="value" id="yValue">50%</span>
+  </label>
+  <input type="range" id="posY"
+    min="0" max="100" value="50">
+
+  <label>
+    旋轉角度：
+    <span class="value" id="rotateValue">0°</span>
+  </label>
+  <input type="range" id="rotate"
+    min="-180" max="180" value="0">
+<!-- X 軸旋轉 -->
+<label>
+  X 軸角度：
+  <span class="value" id="rotateXValue">0°</span>
+</label>
+<input type="range" id="rotateX"
+  min="-180" max="180" value="0">
+
+<!-- Y 軸旋轉 -->
+<label>
+  Y 軸角度：
+ <span class="value" id="rotateYValue">0°</span>
+</label>
+<input type="range" id="rotateY"
+  min="-180" max="180" value="0">
+
+<!-- 透視深度 -->
+<label>
+  透視深度：
+  <span class="value" id="depthValue">1000px</span>
+</label>
+<input type="range" id="depth"
+  min="200" max="2000" value="1000">
+
+  <button id="reset">重設調整</button>
+  <button id="saveProject">💾 儲存作品</button>
+  <button id="saveAsNew">📄 另存新作品</button>
+
+</div>
+
+<div class="panel">
+  <h3>④ 作品資訊</h3>
+  <p id="status">尚未完成上傳</p>
+  <p class="note">
+    目前這個頁面提供本機預覽及調整。
+    下一階段會加入圖片辨識、作品儲存及發布功能。
+  </p>
+
+</div>
+
+<div class="panel">
+  <h3>⑤ 我的作品庫</h3>
+
+  <div id="projectList">
+    <p class="note">目前還沒有儲存作品</p>
+  </div>
+</div>
+
+</div>
+
+<script>
+
+const targetFile = document.getElementById("targetFile");
+const gifFile = document.getElementById("gifFile");
+
+const targetPreview = document.getElementById("targetPreview");
+const gifPreview = document.getElementById("gifPreview");
+const hint = document.getElementById("hint");
+const status = document.getElementById("status");
+
+let targetURL = null;
+let gifURL = null;
+
+// 記錄目前正在編輯的作品
+let currentProjectId = null;
+let currentProjectTargetBlob = null;
+let currentProjectGifBlob = null;
+
+function updateStatus() {
+  const targetReady = !!targetURL;
+  const gifReady = !!gifURL;
+
+  if (targetReady && gifReady) {
+    status.textContent = "✅ 圖片及 GIF 都已上傳！可以調整動畫。";
+    hint.style.display = "none";
+  } else {
+    status.textContent =
+      "目前已上傳：" +
+      (targetReady ? "辨識圖片 " : "") +
+      (gifReady ? "GIF 動圖" : "") +
+      (!targetReady && !gifReady ? "尚無檔案" : "");
+    hint.style.display = targetReady ? "none" : "block";
+  }
+}
+
+targetFile.addEventListener("change", function() {
+  const file = this.files[0];
+  if (!file) return;
+
+  if (targetURL) URL.revokeObjectURL(targetURL);
+
+  targetURL = URL.createObjectURL(file);
+  targetPreview.src = targetURL;
+  updateStatus();
+});
+
+gifFile.addEventListener("change", function() {
+  const file = this.files[0];
+  if (!file) return;
+
+  if (gifURL) URL.revokeObjectURL(gifURL);
+
+  gifURL = URL.createObjectURL(file);
+  gifPreview.src = gifURL;
+  gifPreview.style.display = "block";
+  updateStatus();
+});
+
+const size = document.getElementById("size");
+const posX = document.getElementById("posX");
+const posY = document.getElementById("posY");
+const rotate = document.getElementById("rotate");
+
+// 3D 旋轉控制
+const rotateX = document.getElementById("rotateX");
+const rotateY = document.getElementById("rotateY");
+const depth = document.getElementById("depth");
+
+
+function updatePreview() {
+  const s = size.value;
+  const x = posX.value;
+  const y = posY.value;
+  const r = rotate.value;
+
+  // 讀取 3D 旋轉與透視數值
+  const rx = rotateX.value;
+  const ry = rotateY.value;
+  const d = depth.value;
+
+  gifPreview.style.width = s + "%";
+  gifPreview.style.left = x + "%";
+  gifPreview.style.top = y + "%";
+
+  // 套用 3D 透視與旋轉
+  gifPreview.style.transform =
+    `translate(-50%, -50%) perspective(${d}px) rotateX(${rx}deg) rotateY(${ry}deg) rotate(${r}deg)`;
+
+  // 更新畫面數值
+  document.getElementById("sizeValue").textContent = s + "%";
+  document.getElementById("xValue").textContent = x + "%";
+  document.getElementById("yValue").textContent = y + "%";
+  document.getElementById("rotateValue").textContent = r + "°";
+  document.getElementById("rotateXValue").textContent = rx + "°";
+  document.getElementById("rotateYValue").textContent = ry + "°";
+  document.getElementById("depthValue").textContent = d + "px";
+}
+
+
+
+[size, posX, posY, rotate, rotateX, rotateY, depth].forEach(input => {
+  input.addEventListener("input", updatePreview);
+});
+
+
+document.getElementById("reset").addEventListener("click", function() {
+  size.value = 30;
+  posX.value = 50;
+  posY.value = 50;
+  rotate.value = 0;
+  rotateX.value = 0;
+rotateY.value = 0;
+depth.value = 1000;
+  updatePreview();
+});
+
+updatePreview();
+
+// ===================================
+// ⑤ AR 作品儲存系統（IndexedDB）
+// ===================================
+
+const DB_NAME = "BambyARDatabase";
+const STORE_NAME = "projects";
+
+// 開啟資料庫
+function openDatabase() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, 1);
+
+    request.onupgradeneeded = function () {
+      const db = request.result;
+
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME, {
+          keyPath: "id"
+        });
+      }
+    };
+
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+// 取得所有作品
+async function getProjects() {
+  const db = await openDatabase();
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(STORE_NAME, "readonly");
+    const request = transaction.objectStore(STORE_NAME).getAll();
+
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+
+    transaction.oncomplete = () => db.close();
+  });
+}
+
+// ===================================
+// 刪除作品
+// ===================================
+
+async function deleteProject(id, name) {
+  const confirmed = confirm(
+    `確定要刪除「${name}」嗎？此操作無法復原。`
+  );
+
+  if (!confirmed) return;
+
+  try {
+    const db = await openDatabase();
+
+    await new Promise((resolve, reject) => {
+      const transaction = db.transaction(
+        STORE_NAME,
+        "readwrite"
+      );
+
+      transaction.objectStore(STORE_NAME).delete(id);
+
+      transaction.oncomplete = resolve;
+      transaction.onerror = () => reject(transaction.error);
+      transaction.onabort = () => reject(transaction.error);
+    });
+
+    db.close();
+
+    alert("作品已刪除！");
+    loadProjectList();
+
+  } catch (error) {
+    console.error("刪除失敗：", error);
+    alert("刪除失敗，請稍後再試。");
+  }
+}
+
+// 儲存作品
+async function saveProject() {
+  const name = document.getElementById("projectName").value.trim();
+
+  const target = targetFile.files[0] || currentProjectTargetBlob;
+  const gif = gifFile.files[0] || currentProjectGifBlob;
+
+  if (!name) {
+    alert("請先輸入作品名稱！");
+    return;
+  }
+
+  if (!target || !gif) {
+    alert("請先上傳辨識圖片及 GIF！");
+    return;
+  }
+
+  const project = {
+    id: currentProjectId ?? Date.now(),
+    name: name,
+
+    targetBlob: target,
+    gifBlob: gif,
+
+    settings: {
+      size: size.value,
+      posX: posX.value,
+      posY: posY.value,
+      rotate: rotate.value,
+      rotateX: rotateX.value,
+      rotateY: rotateY.value,
+      depth: depth.value
+    },
+
+    createdAt: new Date().toLocaleString()
+  };
+
+  try {
+    const db = await openDatabase();
+
+    await new Promise((resolve, reject) => {
+      const transaction = db.transaction(STORE_NAME, "readwrite");
+
+      transaction.objectStore(STORE_NAME).put(project);
+
+      transaction.oncomplete = resolve;
+      transaction.onerror = () => reject(transaction.error);
+      transaction.onabort = () => reject(transaction.error);
+    });
+
+    db.close();
+
+// 更新目前編輯中的作品資料
+currentProjectId = project.id;
+currentProjectTargetBlob = target;
+currentProjectGifBlob = gif;
+
+    alert("🎉 作品儲存成功！");
+    document.getElementById("status").textContent =
+      "✅ " + name + " 已成功儲存！";
+
+    loadProjectList();
+
+  } catch (error) {
+    console.error("儲存失敗：", error);
+    alert("儲存失敗，請檢查瀏覽器資料庫空間及權限。");
+  }
+}
+
+// 顯示作品庫
+async function loadProjectList() {
+  const list = document.getElementById("projectList");
+
+  try {
+    const projects = await getProjects();
+
+    list.replaceChildren();
+
+    if (projects.length === 0) {
+      const empty = document.createElement("p");
+      empty.textContent = "目前還沒有儲存作品";
+      empty.className = "note";
+      list.appendChild(empty);
+      return;
+    }
+
+    projects.forEach(project => {
+      const item = document.createElement("div");
+
+      item.style.padding = "15px";
+      item.style.margin = "10px 0";
+      item.style.border = "1px solid #ddd";
+      item.style.borderRadius = "10px";
+
+      const title = document.createElement("strong");
+      title.textContent = "🎨 " + project.name;
+
+      const date = document.createElement("p");
+      date.textContent = "儲存時間：" + project.createdAt;
+
+
+const loadButton = document.createElement("button");
+loadButton.textContent = "開啟作品";
+
+loadButton.addEventListener("click", () => {
+  openProject(project.id);
+});
+
+// 刪除按鈕
+const deleteButton = document.createElement("button");
+deleteButton.textContent = "🗑️ 刪除作品";
+deleteButton.style.background = "#dc5555";
+
+deleteButton.addEventListener("click", () => {
+  deleteProject(project.id, project.name);
+});
+
+item.append(title, date, loadButton, deleteButton);
+
+      list.appendChild(item);
+    });
+
+  } catch (error) {
+    console.error("讀取作品庫失敗：", error);
+  }
+}
+
+// 重新開啟已儲存作品
+async function openProject(id) {
+  const projects = await getProjects();
+  const project = projects.find(p => p.id === id);
+
+  if (!project) return;
+  
+  // 記錄目前正在編輯的作品
+currentProjectId = project.id;
+currentProjectTargetBlob = project.targetBlob;
+currentProjectGifBlob = project.gifBlob;
+
+  if (targetURL) URL.revokeObjectURL(targetURL);
+  if (gifURL) URL.revokeObjectURL(gifURL);
+
+  targetURL = URL.createObjectURL(project.targetBlob);
+  gifURL = URL.createObjectURL(project.gifBlob);
+
+  targetPreview.src = targetURL;
+  gifPreview.src = gifURL;
+  gifPreview.style.display = "block";
+
+  document.getElementById("projectName").value = project.name;
+
+  size.value = project.settings.size;
+  posX.value = project.settings.posX;
+  posY.value = project.settings.posY;
+  rotate.value = project.settings.rotate;
+  rotateX.value = project.settings.rotateX;
+  rotateY.value = project.settings.rotateY;
+  depth.value = project.settings.depth;
+
+  updatePreview();
+  updateStatus();
+
+  document.getElementById("status").textContent =
+    "✅ 已載入作品：" + project.name;
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+}
+
+// 綁定儲存按鈕
+document.getElementById("saveProject")
+  .addEventListener("click", saveProject);
+  
+  // 綁定另存新作品按鈕
+document.getElementById("saveAsNew")
+  .addEventListener("click", () => {
+    currentProjectId = null;
+    saveProject();
+  });
+
+// 網頁開啟時，自動讀取作品庫
+loadProjectList();
+
+</script>
+
+</body>
+</html>
