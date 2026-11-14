@@ -250,7 +250,64 @@ let gifURL = null;
 let currentProjectId = null;
 let currentProjectTargetBlob = null;
 let currentProjectGifBlob = null;
+// ===================================
+// AR 辨識圖片編譯功能
+// ===================================
 
+document.getElementById("compileTarget")
+  .addEventListener("click", async function () {
+
+    const compileStatus = document.getElementById("compileStatus");
+    const file = targetFile.files[0];
+
+    if (!file) {
+      compileStatus.textContent = "請先上傳 AR 辨識圖片！";
+      return;
+    }
+
+    try {
+      compileStatus.textContent = "正在準備圖片……";
+
+      const image = new Image();
+      const imageURL = URL.createObjectURL(file);
+
+      image.src = imageURL;
+      await image.decode();
+
+      compileStatus.textContent = "正在編譯圖片，請稍候……";
+
+      const compiler = new window.MINDAR.IMAGE.Compiler();
+
+      await compiler.compileImageTargets([image], (progress) => {
+        compileStatus.textContent =
+          "圖片編譯中：" + Math.round(progress * 100) + "%";
+      });
+
+      const buffer = await compiler.exportData();
+
+      const mindBlob = new Blob(
+        [buffer],
+        { type: "application/octet-stream" }
+      );
+
+      const downloadURL = URL.createObjectURL(mindBlob);
+      const link = document.createElement("a");
+
+      link.href = downloadURL;
+      link.download = "ar-target.mind";
+      link.click();
+
+      URL.revokeObjectURL(downloadURL);
+      URL.revokeObjectURL(imageURL);
+
+      compileStatus.textContent = "✅ 編譯成功！已下載 .mind 辨識檔。";
+
+    } catch (error) {
+      console.error("圖片編譯失敗：", error);
+      compileStatus.textContent =
+        "❌ 編譯失敗，請查看瀏覽器錯誤訊息。";
+    }
+  });
 function updateStatus() {
   const targetReady = !!targetURL;
   const gifReady = !!gifURL;
